@@ -2,111 +2,208 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="Touchless Medical Image Viewer — a Python, OpenCV and MediaPipe hand gesture project.">
-  <title>Touchless Medical Image Viewer</title>
-  <style>
-    * { box-sizing: border-box; }
-    body {
-      margin: 0;
-      font-family: Arial, sans-serif;
-      background: #0b1120;
-      color: #e8eefc;
-      line-height: 1.6;
-    }
-    header {
-      padding: 22px 8%;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      border-bottom: 1px solid #263149;
-    }
-    header a, .button {
-      color: #fff;
-      text-decoration: none;
-    }
-    .brand { color: #66a6ff; font-weight: bold; font-size: 21px; }
-    main { max-width: 1050px; margin: auto; padding: 55px 24px; }
-    .hero { padding: 25px 0 45px; }
-    .tag { color: #35d6ad; font-weight: bold; }
-    h1 { font-size: clamp(34px, 6vw, 56px); line-height: 1.12; margin: 14px 0; }
-    h2 { color: #8cbaff; }
-    .muted { color: #aab7cf; }
-    .buttons { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 24px; }
-    .button {
-      background: #2377e8;
-      padding: 11px 18px;
-      border-radius: 8px;
-      display: inline-block;
-    }
-    .secondary { background: #1b263a; border: 1px solid #34415a; }
-    .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px; }
-    .card {
-      background: #151f32;
-      border: 1px solid #263149;
-      padding: 22px;
-      border-radius: 14px;
-    }
-    .preview {
-      background: #151f32;
-      border-radius: 14px;
-      padding: 16px;
-      margin: 22px 0;
-      text-align: center;
-    }
-    .preview img { max-width: 100%; max-height: 390px; object-fit: contain; border-radius: 8px; }
-    footer { border-top: 1px solid #263149; padding: 25px; text-align: center; color: #aab7cf; }
-    @media (max-width: 600px) { header { padding: 18px; } main { padding: 30px 18px; } }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#080d19">
+<meta name="description" content="Medi Vision — a touchless medical image viewer built with Python, OpenCV and MediaPipe.">
+<title>Medi Vision — Touchless Imaging</title>
+<style>
+:root {
+  --bg:#080d19;
+  --glass:rgba(255,255,255,.055);
+  --line:rgba(255,255,255,.12);
+  --text:#edf4ff;
+  --muted:#9baac2;
+  --blue:#77aaff;
+  --mint:#75f0cf;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  margin:0;color:var(--text);
+  font-family:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;
+  background:
+    radial-gradient(ellipse at 15% 5%,rgba(48,110,255,.19),transparent 38%),
+    radial-gradient(ellipse at 90% 40%,rgba(38,210,176,.09),transparent 35%),
+    var(--bg);
+  line-height:1.65;
+}
+a{color:inherit;text-decoration:none}
+.wrap{width:min(1100px,calc(100% - 40px));margin:auto}
+nav{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:20px 0;border-bottom:1px solid var(--line);
+}
+.brand{display:flex;align-items:center;gap:11px;font-weight:800;letter-spacing:.08em}
+.logo{
+  display:grid;place-items:center;width:38px;height:38px;border-radius:13px;
+  color:var(--mint);font-size:22px;
+  background:linear-gradient(135deg,rgba(119,170,255,.2),rgba(117,240,207,.12));
+  border:1px solid var(--line);
+}
+.navlinks{display:flex;gap:24px;color:var(--muted);font-size:14px}
+.navlinks a:hover,.textlink:hover{color:var(--mint)}
+.pill{
+  display:inline-flex;align-items:center;gap:8px;border:1px solid var(--line);
+  background:var(--glass);padding:7px 12px;border-radius:99px;
+  color:#cbd9ee;font-size:12px;letter-spacing:.07em;
+}
+.dot{width:7px;height:7px;border-radius:50%;background:var(--mint);box-shadow:0 0 12px var(--mint)}
+.hero{padding:84px 0 48px;max-width:850px}
+.eyebrow{color:var(--mint);font-size:12px;font-weight:750;letter-spacing:.19em;text-transform:uppercase}
+h1{font-size:clamp(42px,7vw,76px);line-height:1.04;letter-spacing:-.055em;margin:22px 0}
+.gradient{
+  background:linear-gradient(100deg,#f5f8ff 5%,#86b5ff 48%,#78f0d0 100%);
+  color:transparent;background-clip:text;-webkit-background-clip:text;
+}
+.lead{max-width:670px;font-size:18px;color:var(--muted)}
+.actions{display:flex;gap:12px;flex-wrap:wrap;margin-top:28px}
+.btn{
+  display:inline-flex;justify-content:center;align-items:center;gap:9px;
+  padding:12px 18px;border-radius:12px;font-weight:700;font-size:14px;
+  border:1px solid var(--line);transition:transform .2s,border-color .2s;
+}
+.btn:hover{transform:translateY(-2px);border-color:rgba(117,240,207,.6)}
+.primary{background:linear-gradient(115deg,#83b4ff,#75f0cf);color:#07111d;border:0}
+.glass{
+  background:linear-gradient(135deg,rgba(255,255,255,.075),rgba(255,255,255,.025));
+  border:1px solid var(--line);border-radius:22px;
+  box-shadow:0 22px 70px rgba(0,0,0,.16);
+  backdrop-filter:blur(16px);
+}
+.preview{padding:17px;margin:20px 0 70px}
+.previewtop{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:4px 4px 15px}
+.label{font-size:12px;letter-spacing:.12em;color:var(--muted);text-transform:uppercase}
+.status{font-size:12px;color:var(--mint)}
+.imagebox{
+  min-height:280px;display:grid;place-items:center;overflow:hidden;
+  border-radius:14px;background:radial-gradient(ellipse,rgba(76,124,182,.13),rgba(4,9,18,.75));
+  border:1px solid rgba(255,255,255,.06);padding:18px;
+}
+.imagebox img{max-width:100%;max-height:430px;object-fit:contain;border-radius:10px}
+.caption{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;padding:13px 4px 0;color:var(--muted);font-size:12px}
+section{scroll-margin-top:30px}
+.sectionhead{margin-bottom:24px}
+h2{font-size:clamp(27px,4vw,38px);letter-spacing:-.035em;margin:8px 0}
+.sub{color:var(--muted);max-width:620px}
+.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:15px}
+.feature{padding:23px;transition:transform .2s,border-color .2s}
+.feature:hover{transform:translateY(-4px);border-color:rgba(119,170,255,.45)}
+.ficon{
+  width:43px;height:43px;border-radius:13px;display:grid;place-items:center;
+  color:var(--mint);font-size:20px;background:rgba(117,240,207,.08);
+  border:1px solid rgba(117,240,207,.16);
+}
+h3{margin:14px 0 6px;font-size:17px}
+.feature p,.panel p{margin:0;color:var(--muted);font-size:14px}
+section.block{margin:75px 0}
+.stack{display:flex;flex-wrap:wrap;gap:10px;margin-top:18px}
+.tech{padding:9px 13px;border-radius:10px;font-size:13px;color:#d6e2f5}
+.panel{padding:26px}
+.panelgrid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+footer{margin-top:80px;border-top:1px solid var(--line);padding:25px 0 35px;color:var(--muted);font-size:12px}
+.footerrow{display:flex;justify-content:space-between;gap:15px;flex-wrap:wrap}
+@media(max-width:650px){
+ .navlinks{gap:12px;font-size:12px}.navlinks a:nth-child(2){display:none}
+ .hero{padding-top:60px}.lead{font-size:16px}
+ .grid,.panelgrid{grid-template-columns:1fr}
+ .preview{padding:10px}.imagebox{min-height:210px}
+}
+@media(prefers-reduced-motion:reduce){
+ html{scroll-behavior:auto}*,*::before,*::after{transition:none!important}
+}
+</style>
 </head>
 <body>
-  <header>
-    <a class="brand" href="#">MEDI VISION</a>
-    <a href="https://github.com/jayashreekumaresan2007-sudo/Touchless-Medical-Image-Viewer">GitHub ↗</a>
-  </header>
+<div class="wrap">
+<nav>
+  <a class="brand" href="#"><span class="logo">✳</span><span>MEDI VISION</span></a>
+  <div class="navlinks">
+    <a href="#features">Features</a>
+    <a href="#technology">Technology</a>
+    <a href="#about">About</a>
+  </div>
+  <a class="btn" href="https://github.com/jayashreekumaresan2007-sudo/Touchless-Medical-Image-Viewer">GitHub ↗</a>
+</nav>
 
-  <main>
-    <section class="hero">
-      <p class="tag">COMPUTER VISION · HAND GESTURES</p>
-      <h1>Touchless Medical<br>Image Viewer</h1>
-      <p class="muted">Explore a hands-free way to interact with medical images using Python, OpenCV and MediaPipe.</p>
-      <div class="buttons">
-        <a class="button" href="https://github.com/jayashreekumaresan2007-sudo/Touchless-Medical-Image-Viewer">View Source Code ↗</a>
-        <a class="button secondary" href="#features">Explore Features</a>
-      </div>
-    </section>
+<header class="hero">
+  <span class="pill"><span class="dot"></span> COMPUTER VISION PROJECT</span>
+  <p class="eyebrow" style="margin-top:28px">A new way to interact with medical images</p>
+  <h1>Imaging, without<br><span class="gradient">touching the screen.</span></h1>
+  <p class="lead">Explore a hands-free medical image viewer powered by hand gesture recognition. Built to make image navigation feel natural, intuitive and accessible.</p>
+  <div class="actions">
+    <a class="btn primary" href="https://github.com/jayashreekumaresan2007-sudo/Touchless-Medical-Image-Viewer">Explore source code ↗</a>
+    <a class="btn" href="#features">Discover features ↓</a>
+  </div>
+</header>
 
-    <section class="preview">
-      <h2>Sample X-ray Image</h2>
-      <img src="images/sample_xray.png" alt="Sample X-ray displayed by the project">
-      <p class="muted">Example image for an educational prototype.</p>
-    </section>
+<div class="preview glass">
+  <div class="previewtop">
+    <span class="label">Imaging workspace / Preview</span>
+    <span class="status">● Sample image</span>
+  </div>
+  <div class="imagebox">
+    <img src="images/sample_xray.png" alt="Sample X-ray image used for the educational project" onerror="this.style.display='none';document.getElementById('imageFallback').style.display='block'">
+    <div id="imageFallback" style="display:none;text-align:center;color:#9baac2">
+      <p>Sample image preview unavailable.</p>
+      <p style="font-size:12px">Check that images/sample_xray.png exists in the repository.</p>
+    </div>
+  </div>
+  <div class="caption">
+    <span>Sample medical image</span>
+    <span>Educational demonstration · Not for diagnosis</span>
+  </div>
+</div>
 
-    <section id="features">
-      <h2>Features</h2>
-      <div class="grid">
-        <article class="card"><h3>🤏 Gesture Zoom</h3><p class="muted">Pinch your thumb and index finger to zoom.</p></article>
-        <article class="card"><h3>☝️ Image Pan</h3><p class="muted">Use the index-finger gesture to navigate the image.</p></article>
-        <article class="card"><h3>🖐️ Rotate</h3><p class="muted">Use an open-palm gesture to rotate the image.</p></article>
-        <article class="card"><h3>✊ Pause</h3><p class="muted">Use a closed fist to pause gesture interaction.</p></article>
-      </div>
-    </section>
+<section id="features" class="block">
+  <div class="sectionhead">
+    <p class="eyebrow">Designed around gestures</p>
+    <h2>Interaction, reimagined.</h2>
+    <p class="sub">Four simple gestures form the core of the touchless viewing experience.</p>
+  </div>
+  <div class="grid">
+    <article class="feature glass"><div class="ficon">⌕</div><h3>Pinch to zoom</h3><p>Bring thumb and index finger together to control image zoom.</p></article>
+    <article class="feature glass"><div class="ficon">✣</div><h3>Gesture to pan</h3><p>Use the index-finger gesture to navigate around the image.</p></article>
+    <article class="feature glass"><div class="ficon">↻</div><h3>Open-palm rotation</h3><p>Rotate the displayed image with an open-palm gesture.</p></article>
+    <article class="feature glass"><div class="ficon">Ⅱ</div><h3>Pause interaction</h3><p>Use a closed fist to pause gesture-based controls.</p></article>
+  </div>
+</section>
 
-    <section>
-      <h2>Technology Stack</h2>
-      <p class="muted">Python · OpenCV · MediaPipe · NumPy · CustomTkinter · Pillow</p>
-    </section>
+<section id="technology" class="block">
+  <div class="sectionhead">
+    <p class="eyebrow">Built with purpose</p>
+    <h2>The technology behind it.</h2>
+    <p class="sub">A Python-based computer vision prototype combining hand tracking with a desktop interface.</p>
+  </div>
+  <div class="stack">
+    <span class="tech glass">Python</span><span class="tech glass">OpenCV</span>
+    <span class="tech glass">MediaPipe</span><span class="tech glass">NumPy</span>
+    <span class="tech glass">CustomTkinter</span><span class="tech glass">Pillow</span>
+  </div>
+</section>
 
-    <section class="card">
-      <h2>Run the Project</h2>
-      <p>Clone the repository, install the dependencies listed in <code>requirements.txt</code>, then run <code>python ui.py</code>.</p>
-      <a class="button" href="https://github.com/jayashreekumaresan2007-sudo/Touchless-Medical-Image-Viewer">Open Repository ↗</a>
-    </section>
+<section id="about" class="block panelgrid">
+  <div class="panel glass">
+    <p class="eyebrow">Project overview</p>
+    <h2>Made to explore.</h2>
+    <p>This project explores hands-free human-computer interaction for medical image viewing. The desktop application uses a webcam to detect gestures and interact with a selected image.</p>
+  </div>
+  <div class="panel glass">
+    <p class="eyebrow">Run locally</p>
+    <h2>Try the project.</h2>
+    <p>Clone the repository, install the dependencies in requirements.txt, then launch the Python desktop interface.</p>
+    <div class="actions">
+      <a class="btn primary" href="https://github.com/jayashreekumaresan2007-sudo/Touchless-Medical-Image-Viewer">View setup instructions ↗</a>
+    </div>
+  </div>
+</section>
 
-    <p class="muted"><strong>Disclaimer:</strong> Educational prototype only. Not intended for clinical diagnosis or medical decision-making.</p>
-  </main>
+<p class="sub" style="font-size:12px">Medical disclaimer: This is an educational prototype, not a validated medical device. It is not intended for clinical diagnosis or medical decision-making.</p>
 
-  <footer>Touchless Medical Image Viewer · Built with Python and Computer Vision</footer>
+<footer><div class="footerrow">
+  <span>✳ MEDI VISION · Touchless Medical Image Viewer</span>
+  <a class="textlink" href="https://github.com/jayashreekumaresan2007-sudo/Touchless-Medical-Image-Viewer">View on GitHub ↗</a>
+</div></footer>
+</div>
 </body>
 </html>
