@@ -5,8 +5,9 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="theme-color" content="#001D39">
-<meta name="description" content="Medi Vision — a touchless medical image viewer powered by Python, OpenCV and MediaPipe.">
+<meta name="description" content="Medi Vision — a touchless medical image viewer with browser-based hand gesture controls.">
 <title>Medi Vision | Touchless Imaging</title>
+
 <style>
 :root {
   --navy:#001D39;
@@ -33,62 +34,39 @@ body{
 }
 a{color:inherit;text-decoration:none}
 .wrap{width:min(1120px,calc(100% - 40px));margin:auto}
-nav{
-  display:flex;align-items:center;justify-content:space-between;
-  padding:20px 0;border-bottom:1px solid var(--stroke);
-}
+nav{display:flex;align-items:center;justify-content:space-between;gap:14px;padding:20px 0;border-bottom:1px solid var(--stroke)}
 .brand{display:flex;align-items:center;gap:11px;font-weight:800;letter-spacing:.13em}
-.brandmark{
-  display:grid;place-items:center;width:40px;height:40px;border-radius:13px;
-  color:var(--ice);font-size:22px;
-  background:linear-gradient(145deg,rgba(123,189,232,.22),rgba(10,65,116,.25));
-  border:1px solid rgba(189,216,233,.23);
-  box-shadow:inset 2px 2px 5px rgba(255,255,255,.08),0 5px 18px rgba(0,0,0,.16);
-}
+.brandmark{display:grid;place-items:center;width:40px;height:40px;border-radius:13px;color:var(--ice);font-size:22px;background:linear-gradient(145deg,rgba(123,189,232,.22),rgba(10,65,116,.25));border:1px solid rgba(189,216,233,.23);box-shadow:inset 2px 2px 5px rgba(255,255,255,.08),0 5px 18px rgba(0,0,0,.16)}
 .navlinks{display:flex;gap:24px;color:var(--muted);font-size:13px}
 .navlinks a:hover{color:var(--ice)}
-.button{
-  display:inline-flex;align-items:center;justify-content:center;gap:9px;
-  padding:12px 17px;border:1px solid var(--stroke);border-radius:11px;
-  font-size:13px;font-weight:700;transition:transform .2s,border-color .2s;
-  background:rgba(189,216,233,.045);
-}
+.button{display:inline-flex;align-items:center;justify-content:center;gap:9px;padding:11px 16px;border:1px solid var(--stroke);border-radius:11px;font-size:13px;font-weight:700;cursor:pointer;transition:transform .2s,border-color .2s;background:rgba(189,216,233,.045);color:var(--white)}
 .button:hover{transform:translateY(-2px);border-color:var(--sky)}
-.button.primary{
-  color:#001D39;background:linear-gradient(120deg,var(--ice),var(--sky));
-  border-color:transparent;box-shadow:0 7px 24px rgba(73,118,159,.19);
-}
-.hero{padding:84px 0 52px;max-width:820px}
+.button.primary{color:#001D39;background:linear-gradient(120deg,var(--ice),var(--sky));border-color:transparent;box-shadow:0 7px 24px rgba(73,118,159,.19)}
+.button:disabled{opacity:.55;cursor:not-allowed;transform:none}
+.hero{padding:75px 0 35px;max-width:820px}
 .eyebrow{color:var(--sky);font-size:11px;font-weight:800;letter-spacing:.2em;text-transform:uppercase}
 h1{font-size:clamp(43px,7vw,76px);line-height:1.06;letter-spacing:-.055em;margin:22px 0}
-.gradient{
-  background:linear-gradient(100deg,#FFFFFF,var(--ice) 48%,var(--sky));
-  color:transparent;background-clip:text;-webkit-background-clip:text;
-}
+.gradient{background:linear-gradient(100deg,#FFF,var(--ice) 48%,var(--sky));color:transparent;background-clip:text;-webkit-background-clip:text}
 .lead{max-width:650px;color:var(--muted);font-size:17px}
 .actions{display:flex;gap:12px;flex-wrap:wrap;margin-top:27px}
-.statuspill{
-  display:inline-flex;align-items:center;gap:9px;padding:7px 12px;
-  border-radius:99px;border:1px solid var(--stroke);background:var(--glass);
-  font-size:11px;letter-spacing:.09em;color:var(--ice);
-}
+.statuspill{display:inline-flex;align-items:center;gap:9px;padding:7px 12px;border-radius:99px;border:1px solid var(--stroke);background:var(--glass);font-size:11px;letter-spacing:.09em;color:var(--ice)}
 .statusdot{width:6px;height:6px;border-radius:50%;background:#80E0CB;box-shadow:0 0 10px #80E0CB}
-.glass{
-  background:linear-gradient(135deg,rgba(189,216,233,.09),rgba(189,216,233,.025));
-  border:1px solid var(--stroke);border-radius:20px;
-  box-shadow:inset 1px 1px 0 rgba(255,255,255,.055),0 22px 55px rgba(0,0,0,.13);
-  backdrop-filter:blur(16px);
-}
+.glass{background:linear-gradient(135deg,rgba(189,216,233,.09),rgba(189,216,233,.025));border:1px solid var(--stroke);border-radius:20px;box-shadow:inset 1px 1px 0 rgba(255,255,255,.055),0 22px 55px rgba(0,0,0,.13);backdrop-filter:blur(16px)}
 .workspace{padding:16px;margin:15px 0 75px}
-.workspacebar{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:3px 3px 15px}
+.workspacebar{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;padding:3px 3px 15px}
 .smalllabel{font-size:11px;letter-spacing:.13em;color:var(--muted);text-transform:uppercase}
-.imagingarea{
-  min-height:320px;display:grid;place-items:center;padding:20px;overflow:hidden;
-  border-radius:13px;border:1px solid rgba(189,216,233,.09);
-  background:radial-gradient(ellipse at center,rgba(73,118,159,.15),rgba(0,12,25,.62));
-}
-.imagingarea img{display:block;max-width:100%;max-height:420px;object-fit:contain;border-radius:9px}
-.fallback{text-align:center;color:var(--muted);font-size:13px}
+.live-layout{display:grid;grid-template-columns:1fr 1fr;gap:15px}
+.camera-panel,.viewer-panel{min-width:0;padding:15px;border:1px solid var(--stroke);border-radius:14px;background:rgba(0,12,25,.4)}
+.panel-title{font-size:12px;font-weight:700;letter-spacing:.08em;margin:0 0 12px}
+.camera-frame{position:relative;background:#000;border-radius:10px;overflow:hidden;min-height:190px}
+#cameraVideo{display:block;width:100%;aspect-ratio:4/3;object-fit:cover;transform:scaleX(-1)}
+#cameraPlaceholder{position:absolute;inset:0;display:grid;place-content:center;text-align:center;padding:20px;color:var(--muted);font-size:13px;background:radial-gradient(ellipse at center,#102E48,#000C19)}
+#imageCanvas{display:block;width:100%;height:auto;aspect-ratio:4/3;object-fit:contain;border-radius:10px;background:#000C19}
+.live-controls{display:flex;gap:9px;flex-wrap:wrap;margin:14px 0}
+.live-status{font-size:13px;color:var(--ice);margin:10px 0;min-height:24px}
+.hint{font-size:11px;color:var(--muted);margin:8px 0 0}
+.file-label{display:inline-flex;align-items:center;gap:8px}
+.file-label input{display:none}
 .caption{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;padding:13px 3px 0;color:var(--muted);font-size:11px}
 .section{margin:76px 0;scroll-margin-top:30px}
 .sectionhead{max-width:680px;margin-bottom:24px}
@@ -97,51 +75,37 @@ h2{font-size:clamp(28px,4vw,40px);letter-spacing:-.04em;line-height:1.15;margin:
 .grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:15px}
 .feature{padding:24px;transition:transform .22s,border-color .22s}
 .feature:hover{transform:translateY(-4px);border-color:rgba(123,189,232,.48)}
-.icon{
-  width:43px;height:43px;display:grid;place-items:center;border-radius:13px;
-  color:var(--ice);font-size:20px;
-  background:linear-gradient(145deg,rgba(123,189,232,.17),rgba(10,65,116,.22));
-  border:1px solid rgba(189,216,233,.14);
-  box-shadow:inset 2px 2px 5px rgba(255,255,255,.045),3px 4px 12px rgba(0,0,0,.12);
-}
+.icon{width:43px;height:43px;display:grid;place-items:center;border-radius:13px;color:var(--ice);font-size:20px;background:linear-gradient(145deg,rgba(123,189,232,.17),rgba(10,65,116,.22));border:1px solid rgba(189,216,233,.14)}
 h3{font-size:16px;margin:15px 0 6px}
 .feature p,.panel p{font-size:13px;color:var(--muted);margin:0}
 .techlist{display:flex;flex-wrap:wrap;gap:10px;margin-top:20px}
-.tech{
-  padding:9px 13px;border-radius:10px;color:var(--ice);font-size:12px;
-  background:linear-gradient(145deg,rgba(189,216,233,.085),rgba(189,216,233,.025));
-  border:1px solid var(--stroke);
-  box-shadow:inset 1px 1px 2px rgba(255,255,255,.035),2px 3px 8px rgba(0,0,0,.09);
-}
+.tech{padding:9px 13px;border-radius:10px;color:var(--ice);font-size:12px;background:linear-gradient(145deg,rgba(189,216,233,.085),rgba(189,216,233,.025));border:1px solid var(--stroke)}
 .twocol{display:grid;grid-template-columns:1fr 1fr;gap:15px}
 .panel{padding:25px}
 .panel .button{margin-top:18px}
 .disclaimer{padding:15px 18px;border-left:2px solid var(--steel);background:rgba(73,118,159,.07);color:var(--muted);font-size:12px}
 footer{margin-top:75px;padding:25px 0 35px;border-top:1px solid var(--stroke);color:var(--muted);font-size:11px}
 .footrow{display:flex;justify-content:space-between;flex-wrap:wrap;gap:12px}
-@media(max-width:650px){
+@media(max-width:700px){
   .navlinks{gap:12px;font-size:11px}
   .navlinks a:nth-child(2){display:none}
-  .hero{padding:59px 0 35px}
+  .hero{padding:50px 0 30px}
   .lead{font-size:15px}
-  .grid,.twocol{grid-template-columns:1fr}
-  .imagingarea{min-height:220px}
+  .grid,.twocol,.live-layout{grid-template-columns:1fr}
   .workspace{padding:10px}
 }
-@media(prefers-reduced-motion:reduce){
-  html{scroll-behavior:auto}
-  *,*::before,*::after{transition:none!important}
-}
+@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}*,*::before,*::after{transition:none!important}}
 </style>
 </head>
+
 <body>
 <div class="wrap">
 <nav>
   <a class="brand" href="#"><span class="brandmark">✳</span><span>MEDI VISION</span></a>
   <div class="navlinks">
+    <a href="#workspace">Live demo</a>
     <a href="#features">Capabilities</a>
     <a href="#technology">Technology</a>
-    <a href="#about">About</a>
   </div>
   <a class="button" href="https://github.com/jayashreekumaresan2007-sudo/Touchless-Medical-Image-Viewer">Source code ↗</a>
 </nav>
@@ -150,42 +114,65 @@ footer{margin-top:75px;padding:25px 0 35px;border-top:1px solid var(--stroke);co
   <span class="statuspill"><span class="statusdot"></span> COMPUTER VISION · TOUCHLESS IMAGING</span>
   <p class="eyebrow" style="margin-top:28px">A new perspective on image interaction</p>
   <h1>Medical imaging,<br><span class="gradient">without the touch.</span></h1>
-  <p class="lead">An experimental imaging interface that brings hand gesture recognition to medical image viewing. Explore a more natural way to navigate, zoom and rotate an image.</p>
+  <p class="lead">Explore a browser-based hand gesture demo for navigating an image. Start your camera, show your hand and try touchless controls.</p>
   <div class="actions">
-    <a class="button primary" href="https://github.com/jayashreekumaresan2007-sudo/Touchless-Medical-Image-Viewer">Explore the project ↗</a>
-    <a class="button" href="#features">Discover capabilities ↓</a>
+    <a class="button primary" href="#workspace">Launch live demo ↓</a>
+    <a class="button" href="https://github.com/jayashreekumaresan2007-sudo/Touchless-Medical-Image-Viewer">Explore the project ↗</a>
   </div>
 </header>
 
-<div class="workspace glass">
+<section id="workspace" class="workspace glass">
   <div class="workspacebar">
-    <span class="smalllabel">Imaging workspace / Sample</span>
-    <span class="smalllabel">Preview 01</span>
+    <span class="smalllabel">Interactive imaging workspace</span>
+    <span class="smalllabel">Browser demo · Educational use</span>
   </div>
-  <div class="imagingarea">
-    <img src="images/sample_xray.png" alt="Sample X-ray image for the touchless viewer" onerror="this.hidden=true;document.getElementById('fallback').hidden=false">
-    <div id="fallback" class="fallback" hidden>
-      <p>Sample image preview is unavailable.</p>
-      <p>Check the images/sample_xray.png repository path.</p>
+
+  <div class="live-layout">
+    <div class="camera-panel">
+      <p class="panel-title">01 / LIVE CAMERA</p>
+      <div class="camera-frame">
+        <video id="cameraVideo" autoplay playsinline muted></video>
+        <div id="cameraPlaceholder">📷<br>Camera is off<br>Press “Start camera” to begin</div>
+      </div>
+      <div class="live-status" id="cameraStatus" role="status">Camera not started.</div>
+      <div class="live-controls">
+        <button class="button primary" id="startCamera">Start camera</button>
+        <button class="button" id="stopCamera" disabled>Stop camera</button>
+      </div>
+      <p class="hint">Allow camera access when your browser asks. Camera video is processed in your browser.</p>
+    </div>
+
+    <div class="viewer-panel">
+      <p class="panel-title">02 / IMAGE VIEWER</p>
+      <canvas id="imageCanvas" width="800" height="600" aria-label="Interactive image viewer"></canvas>
+      <div class="live-status" id="gestureStatus" role="status">Gesture controls are inactive.</div>
+      <div class="live-controls">
+        <label class="button file-label">Upload image
+          <input id="imageUpload" type="file" accept="image/*">
+        </label>
+        <button class="button" id="resetImage">Reset view</button>
+      </div>
+      <p class="hint">Try a pinch to zoom, index finger to pan, open palm to rotate and closed fist to pause.</p>
     </div>
   </div>
+
   <div class="caption">
     <span>Sample image · Educational demonstration</span>
     <span>Not for clinical diagnosis</span>
   </div>
-</div>
+</section>
 
 <section id="features" class="section">
   <div class="sectionhead">
     <p class="eyebrow">Gesture-driven interaction</p>
     <h2>Control the image.<br><span class="gradient">Not the mouse.</span></h2>
-    <p class="sub">Four gesture controls form the core of this hands-free viewing prototype.</p>
+    <p class="sub">Use your webcam to experiment with hands-free image navigation.</p>
   </div>
   <div class="grid">
-    <article class="feature glass"><div class="icon">⌕</div><h3>Pinch to zoom</h3><p>Use thumb and index-finger movement to control image zoom.</p></article>
-    <article class="feature glass"><div class="icon">✣</div><h3>Gesture-based pan</h3><p>Navigate the image using the index-finger gesture.</p></article>
-    <article class="feature glass"><div class="icon">↻</div><h3>Open-palm rotation</h3><p>Rotate the image using an open-palm gesture.</p></article>
-    <article class="feature glass"><div class="icon">Ⅱ</div><h3>Pause interaction</h3><p>Use a closed fist to pause gesture-based controls.</p></article>
+    <article class="feature glass"><div class="icon">🤏</div><h3>Pinch to zoom</h3><p>Bring your thumb and index finger together and move them apart to adjust zoom.</p></article>
+    <article class="feature glass"><div class="icon">☝</div><h3>Gesture-based pan</h3><p>Point with your index finger to move around the image.</p></article>
+    <article class="feature glass"><div class="icon">✋</div><h3>Open-palm rotation</h3><p>Show an open palm and move your hand horizontally to rotate the image.</p></article>
+    <article class="feature glass"><div class="icon">✊</div><h3>Pause interaction</h3><p>Make a fist to pause gesture-based controls.</p></article>
   </div>
 </section>
 
@@ -193,35 +180,391 @@ footer{margin-top:75px;padding:25px 0 35px;border-top:1px solid var(--stroke);co
   <div class="sectionhead">
     <p class="eyebrow">The engineering</p>
     <h2>Built with computer vision.</h2>
-    <p class="sub">A Python desktop prototype combining hand tracking, image processing and a graphical interface.</p>
+    <p class="sub">The original desktop application uses Python and MediaPipe. This live web demo uses browser-compatible JavaScript hand tracking.</p>
   </div>
   <div class="techlist">
-    <span class="tech">Python</span><span class="tech">OpenCV</span>
-    <span class="tech">MediaPipe</span><span class="tech">NumPy</span>
-    <span class="tech">CustomTkinter</span><span class="tech">Pillow</span>
+    <span class="tech">Python desktop app</span>
+    <span class="tech">OpenCV</span>
+    <span class="tech">MediaPipe</span>
+    <span class="tech">JavaScript web demo</span>
+    <span class="tech">HTML &amp; CSS</span>
+    <span class="tech">Canvas API</span>
   </div>
 </section>
 
-<section id="about" class="section twocol">
+<section class="section twocol">
   <div class="panel glass">
     <p class="eyebrow">The concept</p>
     <h2>Designed for hands-free exploration.</h2>
-    <p>This project explores human-computer interaction through webcam-based hand gesture recognition, with a focus on touchless image navigation.</p>
+    <p>This project explores human-computer interaction through webcam-based hand gesture recognition and touchless image navigation.</p>
   </div>
   <div class="panel glass">
     <p class="eyebrow">Explore the code</p>
     <h2>Run it on your machine.</h2>
-    <p>Visit the repository for source code, installation instructions and project dependencies.</p>
+    <p>Visit the repository for the Python desktop application, dependencies and setup instructions.</p>
     <a class="button primary" href="https://github.com/jayashreekumaresan2007-sudo/Touchless-Medical-Image-Viewer">Open repository ↗</a>
   </div>
 </section>
 
-<div class="disclaimer"><strong>Medical disclaimer:</strong> Educational prototype only. It is not a validated medical device and must not be used for clinical diagnosis or medical decision-making.</div>
+<div class="disclaimer"><strong>Medical disclaimer:</strong> Educational prototype only. This is not a validated medical device and must not be used for clinical diagnosis or medical decision-making.</div>
 
 <footer><div class="footrow">
   <span>✳ MEDI VISION · Touchless Medical Image Viewer</span>
   <a href="https://github.com/jayashreekumaresan2007-sudo/Touchless-Medical-Image-Viewer">Source code ↗</a>
 </div></footer>
 </div>
+
+<!-- Browser-based hand tracking -->
+<script src="https://cdn.jsdelivr.net/npm/@mediapipe/hands/hands.js"></script>
+
+<script>
+(() => {
+  const video = document.getElementById("cameraVideo");
+  const placeholder = document.getElementById("cameraPlaceholder");
+  const startButton = document.getElementById("startCamera");
+  const stopButton = document.getElementById("stopCamera");
+  const cameraStatus = document.getElementById("cameraStatus");
+  const gestureStatus = document.getElementById("gestureStatus");
+  const canvas = document.getElementById("imageCanvas");
+  const ctx = canvas.getContext("2d");
+  const upload = document.getElementById("imageUpload");
+
+  let stream = null;
+  let hands = null;
+  let running = false;
+  let busy = false;
+  let image = new Image();
+  let imageReady = false;
+  let imageUrl = null;
+
+  let scale = 1;
+  let offsetX = 0;
+  let offsetY = 0;
+  let rotation = 0;
+  let lastHandX = null;
+  let lastPinch = null;
+  let lastRotateX = null;
+  let paused = false;
+  let lastGesture = "Waiting for hand";
+
+  function setCameraStatus(message) {
+    cameraStatus.textContent = message;
+  }
+
+  function setGestureStatus(message) {
+    gestureStatus.textContent = message;
+  }
+
+  function loadSampleImage() {
+    image = new Image();
+    image.onload = () => {
+      imageReady = true;
+      resetView();
+    };
+    image.onerror = () => {
+      imageReady = false;
+      drawCanvasMessage("Upload an image to get started");
+    };
+    image.src = "images/sample_xray.png";
+  }
+
+  function drawCanvasMessage(message) {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.fillStyle = "#001020";
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    ctx.fillStyle = "#BDD8E9";
+    ctx.textAlign = "center";
+    ctx.font = "18px Segoe UI, Arial";
+    ctx.fillText(message, canvas.width / 2, canvas.height / 2);
+  }
+
+  function drawImage() {
+    if (!imageReady || !image.complete || !image.naturalWidth) {
+      drawCanvasMessage("Upload an image to get started");
+      return;
+    }
+
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.fillStyle = "#001020";
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    ctx.save();
+    ctx.translate(canvas.width / 2 + offsetX, canvas.height / 2 + offsetY);
+    ctx.rotate(rotation);
+    ctx.scale(scale, scale);
+
+    const ratio = Math.min(
+      canvas.width / image.naturalWidth,
+      canvas.height / image.naturalHeight
+    );
+    const w = image.naturalWidth * ratio;
+    const h = image.naturalHeight * ratio;
+
+    ctx.drawImage(image, -w / 2, -h / 2, w, h);
+    ctx.restore();
+  }
+
+  function resetView() {
+    scale = 1;
+    offsetX = 0;
+    offsetY = 0;
+    rotation = 0;
+    lastHandX = null;
+    lastPinch = null;
+    lastRotateX = null;
+    paused = false;
+    drawImage();
+    setGestureStatus(running ? "View reset. Show your hand." : "View reset.");
+  }
+
+  upload.addEventListener("change", event => {
+    const file = event.target.files && event.target.files[0];
+    if (!file) return;
+    if (!file.type.startsWith("image/")) {
+      setGestureStatus("Please select a valid image file.");
+      return;
+    }
+
+    if (imageUrl) URL.revokeObjectURL(imageUrl);
+    imageUrl = URL.createObjectURL(file);
+    const newImage = new Image();
+    newImage.onload = () => {
+      image = newImage;
+      imageReady = true;
+      resetView();
+      setGestureStatus("Image loaded. Start or continue your gestures.");
+    };
+    newImage.onerror = () => setGestureStatus("Could not load that image. Try another file.");
+    newImage.src = imageUrl;
+  });
+
+  document.getElementById("resetImage").addEventListener("click", resetView);
+
+  // Finger-tip landmarks: thumb 4, index 8, middle 12,
+  // ring 16, pinky 20. Their PIP joints are 6, 10, 14, 18.
+  function fingersExtended(lm) {
+    return [
+      lm[8].y < lm[6].y,
+      lm[12].y < lm[10].y,
+      lm[16].y < lm[14].y,
+      lm[20].y < lm[18].y
+    ];
+  }
+
+  function distance(a, b) {
+    return Math.hypot(a.x - b.x, a.y - b.y);
+  }
+
+  function handleResults(results) {
+    busy = false;
+    if (!running) return;
+
+    const landmarks = results.multiHandLandmarks &&
+      results.multiHandLandmarks[0];
+
+    if (!landmarks) {
+      lastHandX = null;
+      lastPinch = null;
+      lastRotateX = null;
+      paused = false;
+      lastGesture = "Waiting for hand";
+      setGestureStatus("No hand detected — show one hand to the camera.");
+      return;
+    }
+
+    const lm = landmarks;
+    const extended = fingersExtended(lm);
+    const indexUp = extended[0];
+    const middleUp = extended[1];
+    const ringUp = extended[2];
+    const pinkyUp = extended[3];
+
+    const pinchDistance = distance(lm[4], lm[8]);
+    const isPinching = pinchDistance < 0.075;
+    const isOpenPalm = indexUp && middleUp && ringUp && pinkyUp;
+    const isIndexOnly = indexUp && !middleUp && !ringUp && !pinkyUp;
+    const isFist = !indexUp && !middleUp && !ringUp && !pinkyUp;
+
+    if (isFist) {
+      paused = true;
+      lastHandX = null;
+      lastPinch = null;
+      lastRotateX = null;
+      lastGesture = "Paused";
+      setGestureStatus("✊ Closed fist detected — gesture controls paused.");
+      return;
+    }
+
+    if (paused) {
+      // Release the fist to resume interaction.
+      paused = false;
+      lastHandX = null;
+      lastPinch = null;
+      lastRotateX = null;
+    }
+
+    if (isPinching) {
+      const current = pinchDistance;
+      if (lastPinch !== null) {
+        const delta = lastPinch - current;
+        scale = Math.max(0.5, Math.min(4, scale + delta * 5));
+        drawImage();
+      }
+      lastPinch = current;
+      lastHandX = null;
+      lastRotateX = null;
+      lastGesture = "Pinch to zoom";
+      setGestureStatus("🤏 Pinch detected — move fingers apart or together to zoom.");
+      return;
+    } else {
+      lastPinch = null;
+    }
+
+    const handX = lm[9].x;
+
+    if (isIndexOnly) {
+      if (lastHandX !== null) {
+        offsetX += (lastHandX - handX) * canvas.width * 1.4;
+        offsetY += (lm[9].y - (lm[9].y + (lastHandX - handX) * 0)) * 0;
+        // Track vertical movement separately for natural panning.
+        if (typeof handleResults.lastY === "number") {
+          offsetY += (lm[9].y - handleResults.lastY) * canvas.height * 1.4;
+        }
+        drawImage();
+      }
+      handleResults.lastY = lm[9].y;
+      lastHandX = handX;
+      lastRotateX = null;
+      lastGesture = "Pan";
+      setGestureStatus("☝ Index finger detected — move your hand to pan.");
+      return;
+    } else {
+      handleResults.lastY = undefined;
+      lastHandX = null;
+    }
+
+    if (isOpenPalm) {
+      if (lastRotateX !== null) {
+        rotation += (handX - lastRotateX) * 2.5;
+        drawImage();
+      }
+      lastRotateX = handX;
+      lastGesture = "Rotate";
+      setGestureStatus("✋ Open palm detected — move your hand sideways to rotate.");
+      return;
+    }
+
+    lastRotateX = null;
+    lastGesture = "Hand detected";
+    setGestureStatus("Hand detected. Try 🤏 zoom, ☝ pan, ✋ rotate or ✊ pause.");
+  }
+
+  async function startCamera() {
+    if (running) return;
+
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+      setCameraStatus("Camera unavailable. Open this page using HTTPS in a supported browser.");
+      return;
+    }
+    if (typeof Hands === "undefined") {
+      setCameraStatus("Hand tracking library did not load. Check your internet connection and refresh.");
+      return;
+    }
+
+    startButton.disabled = true;
+    setCameraStatus("Requesting camera permission…");
+
+    try {
+      stream = await navigator.mediaDevices.getUserMedia({
+        audio: false,
+        video: { facingMode: "user", width: { ideal: 640 }, height: { ideal: 480 } }
+      });
+
+      video.srcObject = stream;
+      await video.play();
+      placeholder.hidden = true;
+
+      hands = new Hands({
+        locateFile: file => "https://cdn.jsdelivr.net/npm/@mediapipe/hands/" + file
+      });
+      hands.setOptions({
+        maxNumHands: 1,
+        modelComplexity: 1,
+        minDetectionConfidence: 0.6,
+        minTrackingConfidence: 0.5
+      });
+      hands.onResults(handleResults);
+
+      running = true;
+      stopButton.disabled = false;
+      startButton.disabled = false;
+      setCameraStatus("Camera active. Show one hand in view.");
+      setGestureStatus("Loading hand tracking…");
+
+      requestAnimationFrame(processFrame);
+    } catch (error) {
+      running = false;
+      startButton.disabled = false;
+      if (stream) stream.getTracks().forEach(track => track.stop());
+      stream = null;
+      video.srcObject = null;
+      placeholder.hidden = false;
+
+      if (error.name === "NotAllowedError" || error.name === "PermissionDeniedError") {
+        setCameraStatus("Camera permission denied. Allow camera access in your browser settings.");
+      } else if (error.name === "NotFoundError") {
+        setCameraStatus("No camera was found on this device.");
+      } else {
+        setCameraStatus("Could not start camera: " + error.message);
+      }
+    }
+  }
+
+  async function processFrame() {
+    if (!running || !hands || busy) {
+      if (running) requestAnimationFrame(processFrame);
+      return;
+    }
+    if (video.readyState >= 2) {
+      busy = true;
+      try {
+        await hands.send({ image: video });
+      } catch (error) {
+        busy = false;
+        setGestureStatus("Hand tracking error. Try refreshing the page.");
+      }
+    }
+    if (running) requestAnimationFrame(processFrame);
+  }
+
+  async function stopCamera() {
+    running = false;
+    busy = false;
+
+    if (stream) stream.getTracks().forEach(track => track.stop());
+    stream = null;
+    video.srcObject = null;
+    placeholder.hidden = false;
+
+    if (hands) {
+      try { await hands.close(); } catch (_) {}
+      hands = null;
+    }
+
+    startButton.disabled = false;
+    stopButton.disabled = true;
+    setCameraStatus("Camera stopped.");
+    setGestureStatus("Gesture controls are inactive.");
+  }
+
+  startButton.addEventListener("click", startCamera);
+  stopButton.addEventListener("click", stopCamera);
+  window.addEventListener("pagehide", () => {
+    if (stream) stream.getTracks().forEach(track => track.stop());
+    if (imageUrl) URL.revokeObjectURL(imageUrl);
+  });
+
+  loadSampleImage();
+})();
+</script>
 </body>
 </html>
