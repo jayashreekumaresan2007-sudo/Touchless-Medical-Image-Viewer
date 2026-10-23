@@ -3,9 +3,9 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="theme-color" content="#001D39">
-<meta name="description" content="Medi Vision — a browser-based touchless medical image viewer prototype.">
+<meta name="description" content="Medi Vision — touchless medical image viewing using browser-based hand tracking.">
 <title>Medi Vision | Touchless Imaging</title>
 
 <style>
@@ -18,8 +18,7 @@
 *{box-sizing:border-box}
 html{scroll-behavior:smooth}
 body{
-  margin:0;color:var(--white);font-family:Inter,"Segoe UI",Arial,sans-serif;
-  line-height:1.65;
+  margin:0;color:var(--white);font-family:Inter,"Segoe UI",Arial,sans-serif;line-height:1.65;
   background:radial-gradient(ellipse at 12% 4%,rgba(73,118,159,.25),transparent 35%),
   radial-gradient(ellipse at 95% 36%,rgba(78,142,162,.13),transparent 32%),
   linear-gradient(145deg,#00172D,#001D39 55%,#03162A);
@@ -49,9 +48,10 @@ h1{font-size:clamp(43px,7vw,76px);line-height:1.06;letter-spacing:-.055em;margin
 .live-layout{display:grid;grid-template-columns:1fr 1fr;gap:15px}
 .camera-panel,.viewer-panel{min-width:0;padding:15px;border:1px solid var(--stroke);border-radius:14px;background:rgba(0,12,25,.4)}
 .panel-title{font-size:12px;font-weight:700;letter-spacing:.08em;margin:0 0 12px}
-.camera-frame{position:relative;background:#000;border-radius:10px;overflow:hidden;min-height:190px}
-#cameraVideo{display:block;width:100%;aspect-ratio:4/3;object-fit:cover;background:#000}
-#cameraPlaceholder{position:absolute;inset:0;display:grid;place-content:center;text-align:center;padding:20px;color:var(--muted);font-size:13px;background:radial-gradient(ellipse at center,#102E48,#000C19)}
+.camera-frame{position:relative;width:100%;aspect-ratio:4/3;min-height:0;overflow:hidden;background:#000;border-radius:10px}
+#cameraVideo{position:absolute;inset:0;display:block;width:100%;height:100%;object-fit:cover;background:#000;transform:scaleX(-1)}
+#cameraPlaceholder{position:absolute;z-index:2;inset:0;display:grid;place-content:center;text-align:center;padding:20px;color:var(--muted);font-size:13px;background:radial-gradient(ellipse at center,#102E48,#000C19)}
+#cameraPlaceholder[hidden]{display:none}
 #imageCanvas{display:block;width:100%;height:auto;aspect-ratio:4/3;object-fit:contain;border-radius:10px;background:#000C19}
 .live-controls{display:flex;gap:9px;flex-wrap:wrap;margin:14px 0}
 .live-status{font-size:13px;color:var(--ice);margin:10px 0;min-height:24px;overflow-wrap:anywhere}
@@ -77,15 +77,17 @@ h3{font-size:16px;margin:15px 0 6px}
 footer{margin-top:75px;padding:25px 0 35px;border-top:1px solid var(--stroke);color:var(--muted);font-size:11px}
 .footrow{display:flex;justify-content:space-between;flex-wrap:wrap;gap:12px}
 @media(max-width:700px){
-  .navlinks{gap:10px;font-size:11px}
-  .navlinks a:nth-child(2){display:none}
-  .hero{padding:50px 0 30px}
-  .lead{font-size:15px}
-  .grid,.twocol,.live-layout{grid-template-columns:1fr}
-  .workspace{padding:10px}
+ .navlinks{gap:10px;font-size:11px}
+ .navlinks a:nth-child(2){display:none}
+ .hero{padding:50px 0 30px}
+ .lead{font-size:15px}
+ .grid,.twocol,.live-layout{grid-template-columns:1fr}
+ .workspace{padding:10px}
 }
+@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}*,*::before,*::after{transition:none!important}}
 </style>
 </head>
+
 <body>
 <div class="wrap">
 <nav>
@@ -98,7 +100,7 @@ footer{margin-top:75px;padding:25px 0 35px;border-top:1px solid var(--stroke);co
   <span class="statuspill"><span class="statusdot"></span> COMPUTER VISION · TOUCHLESS IMAGING</span>
   <p class="eyebrow" style="margin-top:28px">A new perspective on image interaction</p>
   <h1>Medical imaging,<br><span class="gradient">without the touch.</span></h1>
-  <p class="lead">Explore a browser-based hand gesture demo for navigating an image. Start your camera, show your hand and try touchless controls.</p>
+  <p class="lead">Explore a browser-based hand gesture demo for navigating images. Start your camera, show your hand and try touchless controls.</p>
   <div class="actions"><a class="button primary" href="#workspace">Launch live demo ↓</a><a class="button" href="https://github.com/jayashreekumaresan2007-sudo/Touchless-Medical-Image-Viewer">Explore the project ↗</a></div>
 </header>
 
@@ -113,7 +115,7 @@ footer{margin-top:75px;padding:25px 0 35px;border-top:1px solid var(--stroke);co
       </div>
       <div class="live-status" id="cameraStatus" role="status">Camera not started.</div>
       <div class="live-controls"><button class="button primary" id="startCamera">Start camera</button><button class="button" id="stopCamera" disabled>Stop camera</button></div>
-      <p class="hint">Allow camera access when your browser asks. Video is processed in your browser.</p>
+      <p class="hint">Allow camera access when prompted. Video stays in your browser.</p>
     </div>
     <div class="viewer-panel">
       <p class="panel-title">02 / IMAGE VIEWER</p>
@@ -140,15 +142,16 @@ footer{margin-top:75px;padding:25px 0 35px;border-top:1px solid var(--stroke);co
 </section>
 
 <section id="technology" class="section">
-  <div class="sectionhead"><p class="eyebrow">The engineering</p><h2>Built with computer vision.</h2><p class="sub">The desktop prototype uses Python; the live website demo uses browser-based JavaScript hand tracking.</p></div>
-  <div class="techlist"><span class="tech">Python</span><span class="tech">OpenCV</span><span class="tech">MediaPipe</span><span class="tech">JavaScript</span><span class="tech">HTML &amp; CSS</span><span class="tech">Canvas API</span></div>
+  <div class="sectionhead"><p class="eyebrow">The engineering</p><h2>Built with computer vision.</h2><p class="sub">The desktop application uses Python; this live website demo uses browser-based JavaScript hand tracking.</p></div>
+  <div class="techlist"><span class="tech">Python</span><span class="tech">OpenCV</span><span class="tech">MediaPipe Hands</span><span class="tech">JavaScript</span><span class="tech">HTML &amp; CSS</span><span class="tech">Canvas API</span></div>
 </section>
 
 <section class="section twocol">
   <div class="panel glass"><p class="eyebrow">The concept</p><h2>Hands-free exploration.</h2><p>This project explores human-computer interaction through webcam-based hand gesture recognition and touchless image navigation.</p></div>
-  <div class="panel glass"><p class="eyebrow">Explore the code</p><h2>Run it on your machine.</h2><p>Visit the repository for the Python desktop app, dependencies and setup instructions.</p><a class="button primary" href="https://github.com/jayashreekumaresan2007-sudo/Touchless-Medical-Image-Viewer">Open repository ↗</a></div>
+  <div class="panel glass"><p class="eyebrow">Explore the code</p><h2>Run it on your machine.</h2><p>Visit the repository for the Python desktop application, dependencies and setup instructions.</p><a class="button primary" href="https://github.com/jayashreekumaresan2007-sudo/Touchless-Medical-Image-Viewer">Open repository ↗</a></div>
 </section>
-<div class="disclaimer"><strong>Medical disclaimer:</strong> Educational prototype only. Not a validated medical device; do not use for diagnosis or medical decision-making.</div>
+
+<div class="disclaimer"><strong>Medical disclaimer:</strong> Educational prototype only. This is not a validated medical device and must not be used for diagnosis or medical decision-making.</div>
 <footer><div class="footrow"><span>✳ MEDI VISION · Touchless Medical Image Viewer</span><a href="https://github.com/jayashreekumaresan2007-sudo/Touchless-Medical-Image-Viewer">Source code ↗</a></div></footer>
 </div>
 
@@ -166,16 +169,15 @@ footer{margin-top:75px;padding:25px 0 35px;border-top:1px solid var(--stroke);co
   const upload = document.getElementById("imageUpload");
 
   let stream = null, hands = null, running = false, busy = false;
-  let frameId = null, image = new Image(), imageReady = false, imageUrl = null;
-  let scale = 1, offsetX = 0, offsetY = 0, rotation = 0;
+  let frameId = null, image = new Image(), imageReady = false;
+  let imageUrl = null, scale = 1, offsetX = 0, offsetY = 0, rotation = 0;
   let previousHand = null, previousPinch = null, previousRotateX = null;
   let paused = false, lastDetectionTime = 0;
 
-  function status(text) { cameraStatus.textContent = text; }
-  function gesture(text) { gestureStatus.textContent = text; }
+  const setCameraStatus = text => { cameraStatus.textContent = text; };
+  const setGestureStatus = text => { gestureStatus.textContent = text; };
 
   function drawMessage(text) {
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
     ctx.fillStyle = "#001020";
     ctx.fillRect(0, 0, canvas.width, canvas.height);
     ctx.fillStyle = "#BDD8E9";
@@ -189,47 +191,55 @@ footer{margin-top:75px;padding:25px 0 35px;border-top:1px solid var(--stroke);co
       drawMessage("Upload an image to get started");
       return;
     }
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
     ctx.fillStyle = "#001020";
     ctx.fillRect(0, 0, canvas.width, canvas.height);
     const fit = Math.min(canvas.width / image.naturalWidth, canvas.height / image.naturalHeight);
+    const w = image.naturalWidth * fit;
+    const h = image.naturalHeight * fit;
+
     ctx.save();
     ctx.translate(canvas.width / 2 + offsetX, canvas.height / 2 + offsetY);
     ctx.rotate(rotation);
     ctx.scale(scale, scale);
-    const w = image.naturalWidth * fit, h = image.naturalHeight * fit;
     ctx.drawImage(image, -w / 2, -h / 2, w, h);
     ctx.restore();
   }
 
   function resetView() {
-    scale = 1; offsetX = 0; offsetY = 0; rotation = 0;
-    previousHand = null; previousPinch = null; previousRotateX = null;
+    scale = 1;
+    offsetX = 0;
+    offsetY = 0;
+    rotation = 0;
+    previousHand = null;
+    previousPinch = null;
+    previousRotateX = null;
     drawImage();
-    gesture(running ? "View reset. Show your hand." : "View reset.");
+    setGestureStatus(running ? "View reset. Show your hand." : "View reset.");
   }
 
-  function setImage(src) {
+  function loadImage(src) {
     const next = new Image();
     next.onload = () => {
       image = next;
       imageReady = true;
       resetView();
     };
-    next.onerror = () => gesture("Could not load image. Try another file.");
+    next.onerror = () => setGestureStatus("Could not load image. Please try another.");
     next.src = src;
   }
 
-  upload.addEventListener("change", e => {
-    const file = e.target.files && e.target.files[0];
+  loadImage("images/sample_xray.png");
+
+  upload.addEventListener("change", event => {
+    const file = event.target.files && event.target.files[0];
     if (!file) return;
     if (!file.type.startsWith("image/")) {
-      gesture("Please choose a valid image.");
+      setGestureStatus("Please choose an image file.");
       return;
     }
     if (imageUrl) URL.revokeObjectURL(imageUrl);
     imageUrl = URL.createObjectURL(file);
-    setImage(imageUrl);
+    loadImage(imageUrl);
   });
 
   document.getElementById("resetImage").addEventListener("click", resetView);
@@ -238,7 +248,7 @@ footer{margin-top:75px;padding:25px 0 35px;border-top:1px solid var(--stroke);co
     return Math.hypot(a.x - b.x, a.y - b.y);
   }
 
-  function fingersUp(lm) {
+  function getFingers(lm) {
     return {
       index: lm[8].y < lm[6].y,
       middle: lm[12].y < lm[10].y,
@@ -248,40 +258,45 @@ footer{margin-top:75px;padding:25px 0 35px;border-top:1px solid var(--stroke);co
   }
 
   function onResults(results) {
-    const lm = results.multiHandLandmarks?.[0];
-    if (!running || !lm) {
-      previousHand = null; previousPinch = null; previousRotateX = null;
-      if (running) gesture("No hand detected — show one hand clearly.");
+    if (!running) return;
+
+    const lm = results.multiHandLandmarks && results.multiHandLandmarks[0];
+    if (!lm) {
+      previousHand = previousPinch = previousRotateX = null;
+      setGestureStatus("No hand detected — show one hand clearly.");
       return;
     }
 
-    const f = fingersUp(lm);
+    const f = getFingers(lm);
     const fist = !f.index && !f.middle && !f.ring && !f.pinky;
     const openPalm = f.index && f.middle && f.ring && f.pinky;
     const indexOnly = f.index && !f.middle && !f.ring && !f.pinky;
-    const pinch = distance(lm[4], lm[8]) < 0.075;
-    const x = lm[9].x, y = lm[9].y;
+    const pinchDistance = distance(lm[4], lm[8]);
+    const pinch = pinchDistance < 0.075;
+    const x = lm[9].x;
+    const y = lm[9].y;
 
     if (fist) {
       paused = true;
-      previousHand = null; previousPinch = null; previousRotateX = null;
-      gesture("✊ Fist detected — controls paused.");
+      previousHand = previousPinch = previousRotateX = null;
+      setGestureStatus("✊ Closed fist — controls paused.");
       return;
     }
+
     if (paused) {
       paused = false;
-      previousHand = null; previousPinch = null; previousRotateX = null;
-      gesture("Controls resumed.");
+      previousHand = previousPinch = previousRotateX = null;
+      setGestureStatus("Controls resumed.");
     }
 
     if (pinch) {
       if (previousPinch !== null) {
-        scale = Math.max(0.5, Math.min(4, scale + (previousPinch - distance(lm[4], lm[8])) * 5));
+        scale = Math.max(0.5, Math.min(4, scale + (previousPinch - pinchDistance) * 4));
         drawImage();
       }
-      previousPinch = distance(lm[4], lm[8]);
-      previousHand = null; previousRotateX = null;
-      gesture("🤏 Pinch detected — move fingers together or apart.");
+      previousPinch = pinchDistance;
+      previousHand = previousRotateX = null;
+      setGestureStatus("🤏 Pinch detected — move fingers together or apart.");
       return;
     }
     previousPinch = null;
@@ -294,7 +309,7 @@ footer{margin-top:75px;padding:25px 0 35px;border-top:1px solid var(--stroke);co
       }
       previousHand = {x, y};
       previousRotateX = null;
-      gesture("☝ Index finger — pan the image.");
+      setGestureStatus("☝ Index finger — pan the image.");
       return;
     }
     previousHand = null;
@@ -305,65 +320,69 @@ footer{margin-top:75px;padding:25px 0 35px;border-top:1px solid var(--stroke);co
         drawImage();
       }
       previousRotateX = x;
-      gesture("✋ Open palm — move sideways to rotate.");
+      setGestureStatus("✋ Open palm — move sideways to rotate.");
       return;
     }
 
     previousRotateX = null;
-    gesture("Hand detected — try pinch, index finger, open palm or fist.");
+    setGestureStatus("Hand detected — try pinch, index finger, open palm or fist.");
   }
 
   async function processFrame() {
     if (!running) return;
+
+    // Limit tracking to about 8 frames per second to reduce CPU load.
     if (!busy && hands && video.readyState >= HTMLMediaElement.HAVE_CURRENT_DATA &&
-        performance.now() - lastDetectionTime > 100) {
+        performance.now() - lastDetectionTime >= 125) {
       busy = true;
       lastDetectionTime = performance.now();
       try {
         await hands.send({image: video});
-      } catch (err) {
-        gesture("Tracking error: " + err.message);
+      } catch (error) {
+        setGestureStatus("Tracking error. Refresh the page and try again.");
       } finally {
         busy = false;
       }
     }
+
     if (running) frameId = requestAnimationFrame(processFrame);
   }
 
   async function stopCamera() {
     running = false;
-    busy = false;
     if (frameId !== null) cancelAnimationFrame(frameId);
     frameId = null;
+    busy = false;
 
     if (stream) stream.getTracks().forEach(track => track.stop());
     stream = null;
     video.pause();
     video.srcObject = null;
     placeholder.hidden = false;
-    stopBtn.disabled = true;
     startBtn.disabled = false;
+    stopBtn.disabled = true;
 
     if (hands) {
       try { await hands.close(); } catch (_) {}
       hands = null;
     }
-    status("Camera stopped.");
-    gesture("Gesture controls are inactive.");
+
+    setCameraStatus("Camera stopped.");
+    setGestureStatus("Gesture controls are inactive.");
   }
 
   async function startCamera() {
     if (running) return;
     startBtn.disabled = true;
-    status("Connecting to camera…");
-    gesture("Preparing hand tracking…");
+    setCameraStatus("Connecting to camera…");
+    setGestureStatus("Preparing hand tracking…");
 
     try {
-      if (!navigator.mediaDevices?.getUserMedia) {
-        throw new Error("Camera API unavailable. Use the HTTPS website in Chrome.");
+      if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+        throw new Error("Camera API unavailable. Open the HTTPS website in Chrome.");
       }
       if (typeof Hands === "undefined") {
-        throw new Error("Hand tracking library failed to load. Check internet and refresh.");
+        throw new Error("Hand tracking library did not load. Check your internet connection.");
       }
 
       stream = await navigator.mediaDevices.getUserMedia({
@@ -372,7 +391,7 @@ footer{margin-top:75px;padding:25px 0 35px;border-top:1px solid var(--stroke);co
           facingMode: "user",
           width: {ideal: 640},
           height: {ideal: 480},
-          frameRate: {ideal: 24, max: 30}
+          frameRate: {ideal: 20, max: 24}
         }
       });
 
@@ -381,8 +400,9 @@ footer{margin-top:75px;padding:25px 0 35px;border-top:1px solid var(--stroke);co
       video.playsInline = true;
       await video.play();
 
-      // Wait for a real camera frame before showing the preview.
-      if (!video.videoWidth || !video.videoHeight) {
+      // Wait for the camera to deliver real frames before initializing tracking.
+      if (video.readyState < HTMLMediaElement.HAVE_CURRENT_DATA ||
+          !video.videoWidth || !video.videoHeight) {
         await new Promise((resolve, reject) => {
           const timeout = setTimeout(() => reject(new Error("Camera opened but no video frames arrived. Close other camera apps and retry.")), 8000);
           video.addEventListener("loadeddata", () => {
@@ -393,60 +413,61 @@ footer{margin-top:75px;padding:25px 0 35px;border-top:1px solid var(--stroke);co
       }
 
       if (!video.videoWidth || !video.videoHeight) {
-        throw new Error("Camera has no video frames. Close other apps using the camera and retry.");
+        throw new Error("Camera stream has no video frames.");
       }
 
-      status(`Camera preview active · ${video.videoWidth} × ${video.videoHeight}`);
+      // Show the preview immediately; do not wait for the tracking model.
       placeholder.hidden = true;
+      setCameraStatus(`Camera preview active · ${video.videoWidth} × ${video.videoHeight}`);
 
       hands = new Hands({
-        locateFile: file => `https://cdn.jsdelivr.net/npm/@mediapipe/hands/${file}`
+        locateFile: file => "https://cdn.jsdelivr.net/npm/@mediapipe/hands/" + file
       });
       hands.setOptions({
         maxNumHands: 1,
         modelComplexity: 0,
-        minDetectionConfidence: 0.65,
-        minTrackingConfidence: 0.55
+        minDetectionConfidence: 0.6,
+        minTrackingConfidence: 0.5
       });
       hands.onResults(onResults);
+
       await hands.initialize();
 
       running = true;
-      stopBtn.disabled = false;
       startBtn.disabled = false;
-      gesture("Hand tracking ready — show one hand to the camera.");
+      stopBtn.disabled = false;
+      setGestureStatus("Hand tracking ready — show your hand to the camera.");
       frameId = requestAnimationFrame(processFrame);
-    } catch (err) {
+
+    } catch (error) {
+      running = false;
       if (stream) stream.getTracks().forEach(track => track.stop());
       stream = null;
       video.srcObject = null;
       placeholder.hidden = false;
-      running = false;
       startBtn.disabled = false;
       stopBtn.disabled = true;
 
-      const message = err.name === "NotAllowedError"
-        ? "Camera permission denied. Set this website's camera permission to Allow."
-        : err.name === "NotFoundError"
+      const msg = error.name === "NotAllowedError"
+        ? "Camera permission denied. Set site camera permission to Allow."
+        : error.name === "NotFoundError"
         ? "No camera found. Check your webcam connection."
-        : err.name === "NotReadableError"
-        ? "Camera is busy. Close the Python app and other camera apps, then retry."
-        : err.message || "Could not start camera.";
-      status("Could not start camera: " + message);
-      gesture("Camera or tracking initialization failed.");
+        : error.name === "NotReadableError"
+        ? "Camera is busy. Close the desktop app and other camera apps."
+        : error.message || "Could not start camera.";
+      setCameraStatus("Could not start camera: " + msg);
+      setGestureStatus("Camera or tracking initialization failed.");
     }
   }
 
   startBtn.addEventListener("click", startCamera);
   stopBtn.addEventListener("click", stopCamera);
+
   window.addEventListener("pagehide", () => {
     running = false;
     if (stream) stream.getTracks().forEach(track => track.stop());
     if (imageUrl) URL.revokeObjectURL(imageUrl);
   });
-
-  // Load the sample image from the repository.
-  setImage("images/sample_xray.png");
 })();
 </script>
 </body>
