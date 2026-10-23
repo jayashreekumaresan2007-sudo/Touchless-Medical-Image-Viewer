@@ -1,49 +1,26 @@
+# 💙 Medi Vision — Touchless Medical Image Viewer
 
-<div align="center">
+A touchless medical image viewing prototype that uses hand gestures to interact with medical images, providing an alternative to traditional mouse-based controls.
 
-# ✳ MEDI VISION
+## ✨ Features
 
-### Touchless Medical Image Viewer
+- 🤏 **Zoom:** Use a thumb-and-index-finger pinch gesture.
+- ✋ **Pan:** Move the index finger to navigate the image.
+- 🔄 **Rotate:** Use an open-palm gesture.
+- ✊ **Pause:** Use a closed-fist gesture.
+- 🖼️ **Image Selection:** Load an image from your computer.
+- ♻️ **Reset View:** Return the image to its default view.
 
-**Imaging, without touching the screen.**
+## 🛠️ Technologies Used
 
-A computer vision project exploring hands-free medical image interaction using Python, OpenCV and MediaPipe.
+- Python
+- OpenCV
+- MediaPipe
+- NumPy
+- CustomTkinter
+- Pillow
 
-[**🌐 Live Website**](https://jayashreekumaresan2007-sudo.github.io/Touchless-Medical-Image-Viewer/) · [**💻 Source Code**](https://github.com/jayashreekumaresan2007-sudo/Touchless-Medical-Image-Viewer)
-
-![Python](https://img.shields.io/badge/Python-3776AB?style=for-the-badge&logo=python&logoColor=white)
-![OpenCV](https://img.shields.io/badge/OpenCV-5C3EE8?style=for-the-badge&logo=opencv&logoColor=white)
-![MediaPipe](https://img.shields.io/badge/MediaPipe-00A98F?style=for-the-badge&logo=google&logoColor=white)
-
-</div>
-
----
-
-## ◈ Project Overview
-
-Medi Vision is an educational prototype that lets users interact with a displayed medical image through webcam-based hand gestures. It combines computer vision with a desktop interface to explore a more natural, touchless interaction experience.
-
-## ✦ Features
-
-| Gesture | Action | Description |
-|---|---|---|
-| 🤏 Pinch | Zoom | Zoom the image using thumb and index finger |
-| ☝️ Index finger | Pan | Navigate around the image |
-| 🖐️ Open palm | Rotate | Rotate the displayed image |
-| ✊ Closed fist | Pause | Pause gesture-based interaction |
-| 🖼️ Select Image | Load image | Choose a supported image from your computer |
-| ↺ Reset View | Reset | Restore the original view |
-
-## ◈ Technology Stack
-
-- **Python** — application logic
-- **OpenCV** — image processing and webcam frames
-- **MediaPipe** — hand landmark detection
-- **NumPy** — numerical operations
-- **CustomTkinter** — desktop user interface
-- **Pillow** — image handling
-
-## ⌘ Run Locally
+## 🚀 Getting Started
 
 ### 1. Clone the repository
 
@@ -52,30 +29,37 @@ git clone https://github.com/jayashreekumaresan2007-sudo/Touchless-Medical-Image
 cd Touchless-Medical-Image-Viewer
 ```
 
-### 2. Create and activate a virtual environment
+### 2. Create a virtual environment
 
-**Windows PowerShell:**
-
-```powershell
+```bash
 python -m venv .venv
-.\.venv\Scripts\Activate.ps1
+```
+
+Activate it on Windows:
+
+```bash
+.venv\Scripts\activate
 ```
 
 ### 3. Install dependencies
 
 ```bash
-python -m pip install -r requirements.txt
+pip install -r requirements.txt
 ```
 
-### 4. Launch the application
+### 4. Run the application
 
 ```bash
-python ui.py
+python main.py
 ```
 
-Allow camera access when prompted. The hand landmark model file `hand_landmarker.task` must be present in the project directory.
+Allow webcam access when prompted.
 
-## ▦ Project Structure
+## 🌐 Project Website
+
+[Visit Medi Vision](https://jayashreekumaresan2007-sudo.github.io/Touchless-Medical-Image-Viewer/)
+
+## 📁 Project Structure
 
 ```text
 Touchless-Medical-Image-Viewer/
@@ -84,24 +68,20 @@ Touchless-Medical-Image-Viewer/
 ├── hand_landmarker.task
 ├── index.html
 ├── main.py
-├── ui.py
 ├── requirements.txt
-└── README.md
+├── README.md
+├── sample_xray.png
+└── ui.py
 ```
 
-## ◈ Links
+## 🎯 Project Goal
 
-- **Live Portfolio:** [Open Medi Vision](https://jayashreekumaresan2007-sudo.github.io/Touchless-Medical-Image-Viewer/)
-- **GitHub Repository:** [View Source Code](https://github.com/jayashreekumaresan2007-sudo/Touchless-Medical-Image-Viewer)
+To explore gesture-based interaction with medical images using computer vision and create a touchless image-viewing experience.
 
 ## ⚠️ Disclaimer
 
-This project is intended for educational and demonstration purposes only. It is not a validated medical device and must not be used for clinical diagnosis or medical decision-making.
+This is an educational prototype, not a certified medical device. It is not intended for diagnosis or clinical decision-making.
 
----
+## 👩‍💻 Author
 
-<div align="center">
-
-**Medi Vision · Exploring Human–Computer Interaction**
-
-</div>
+Developed as a computer science project to explore Python, computer vision, and human-computer interaction.
