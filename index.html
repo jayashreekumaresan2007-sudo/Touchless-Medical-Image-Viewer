@@ -49,9 +49,9 @@ h1{font-size:clamp(43px,7vw,76px);line-height:1.06;letter-spacing:-.055em;margin
 .camera-panel,.viewer-panel{min-width:0;padding:15px;border:1px solid var(--stroke);border-radius:14px;background:rgba(0,12,25,.4)}
 .panel-title{font-size:12px;font-weight:700;letter-spacing:.08em;margin:0 0 12px}
 .camera-frame{position:relative;width:100%;aspect-ratio:4/3;min-height:0;overflow:hidden;background:#000;border-radius:10px}
-#cameraVideo{position:absolute;inset:0;display:block;width:100%;height:100%;object-fit:cover;background:#000;transform:scaleX(-1)}
+#cameraVideo{position:absolute;z-index:1;inset:0;display:block;width:100%;height:100%;object-fit:cover;background:#000;transform:scaleX(-1)}
 #cameraPlaceholder{position:absolute;z-index:2;inset:0;display:grid;place-content:center;text-align:center;padding:20px;color:var(--muted);font-size:13px;background:radial-gradient(ellipse at center,#102E48,#000C19)}
-#cameraPlaceholder[hidden]{display:none}
+#cameraPlaceholder[hidden]{display:none!important}
 #imageCanvas{display:block;width:100%;height:auto;aspect-ratio:4/3;object-fit:contain;border-radius:10px;background:#000C19}
 .live-controls{display:flex;gap:9px;flex-wrap:wrap;margin:14px 0}
 .live-status{font-size:13px;color:var(--ice);margin:10px 0;min-height:24px;overflow-wrap:anywhere}
@@ -115,7 +115,7 @@ footer{margin-top:75px;padding:25px 0 35px;border-top:1px solid var(--stroke);co
       </div>
       <div class="live-status" id="cameraStatus" role="status">Camera not started.</div>
       <div class="live-controls"><button class="button primary" id="startCamera">Start camera</button><button class="button" id="stopCamera" disabled>Stop camera</button></div>
-      <p class="hint">Allow camera access when prompted. Video stays in your browser.</p>
+      <p class="hint">Allow camera access when your browser asks. Video stays in your browser.</p>
     </div>
     <div class="viewer-panel">
       <p class="panel-title">02 / IMAGE VIEWER</p>
@@ -173,9 +173,15 @@ footer{margin-top:75px;padding:25px 0 35px;border-top:1px solid var(--stroke);co
   let imageUrl = null, scale = 1, offsetX = 0, offsetY = 0, rotation = 0;
   let previousHand = null, previousPinch = null, previousRotateX = null;
   let paused = false, lastDetectionTime = 0;
+  let lastGestureLabel = "";
 
   const setCameraStatus = text => { cameraStatus.textContent = text; };
-  const setGestureStatus = text => { gestureStatus.textContent = text; };
+  const setGestureStatus = text => {
+    if (lastGestureLabel !== text) {
+      gestureStatus.textContent = text;
+      lastGestureLabel = text;
+    }
+  };
 
   function drawMessage(text) {
     ctx.fillStyle = "#001020";
@@ -191,8 +197,10 @@ footer{margin-top:75px;padding:25px 0 35px;border-top:1px solid var(--stroke);co
       drawMessage("Upload an image to get started");
       return;
     }
+
     ctx.fillStyle = "#001020";
     ctx.fillRect(0, 0, canvas.width, canvas.height);
+
     const fit = Math.min(canvas.width / image.naturalWidth, canvas.height / image.naturalHeight);
     const w = image.naturalWidth * fit;
     const h = image.naturalHeight * fit;
@@ -233,10 +241,12 @@ footer{margin-top:75px;padding:25px 0 35px;border-top:1px solid var(--stroke);co
   upload.addEventListener("change", event => {
     const file = event.target.files && event.target.files[0];
     if (!file) return;
+
     if (!file.type.startsWith("image/")) {
       setGestureStatus("Please choose an image file.");
       return;
     }
+
     if (imageUrl) URL.revokeObjectURL(imageUrl);
     imageUrl = URL.createObjectURL(file);
     loadImage(imageUrl);
@@ -261,6 +271,7 @@ footer{margin-top:75px;padding:25px 0 35px;border-top:1px solid var(--stroke);co
     if (!running) return;
 
     const lm = results.multiHandLandmarks && results.multiHandLandmarks[0];
+
     if (!lm) {
       previousHand = previousPinch = previousRotateX = null;
       setGestureStatus("No hand detected — show one hand clearly.");
@@ -272,7 +283,11 @@ footer{margin-top:75px;padding:25px 0 35px;border-top:1px solid var(--stroke);co
     const openPalm = f.index && f.middle && f.ring && f.pinky;
     const indexOnly = f.index && !f.middle && !f.ring && !f.pinky;
     const pinchDistance = distance(lm[4], lm[8]);
-    const pinch = pinchDistance < 0.075;
+
+    const pinch = previousPinch !== null
+      ? pinchDistance < 0.095
+      : pinchDistance < 0.065;
+
     const x = lm[9].x;
     const y = lm[9].y;
 
@@ -291,14 +306,22 @@ footer{margin-top:75px;padding:25px 0 35px;border-top:1px solid var(--stroke);co
 
     if (pinch) {
       if (previousPinch !== null) {
-        scale = Math.max(0.5, Math.min(4, scale + (previousPinch - pinchDistance) * 4));
-        drawImage();
+        const delta = previousPinch - pinchDistance;
+
+        // Reduce tiny movements caused by hand-tracking jitter.
+        if (Math.abs(delta) > 0.006) {
+          const zoomFactor = 1 + delta * 1.8;
+          scale = Math.max(0.65, Math.min(3.5, scale * zoomFactor));
+          drawImage();
+        }
       }
+
       previousPinch = pinchDistance;
       previousHand = previousRotateX = null;
-      setGestureStatus("🤏 Pinch detected — move fingers together or apart.");
+      setGestureStatus("🤏 Pinch detected — slowly move fingers together or apart.");
       return;
     }
+
     previousPinch = null;
 
     if (indexOnly) {
@@ -307,11 +330,13 @@ footer{margin-top:75px;padding:25px 0 35px;border-top:1px solid var(--stroke);co
         offsetY += (previousHand.y - y) * canvas.height * 1.3;
         drawImage();
       }
+
       previousHand = {x, y};
       previousRotateX = null;
       setGestureStatus("☝ Index finger — pan the image.");
       return;
     }
+
     previousHand = null;
 
     if (openPalm) {
@@ -319,6 +344,7 @@ footer{margin-top:75px;padding:25px 0 35px;border-top:1px solid var(--stroke);co
         rotation += (x - previousRotateX) * 2.5;
         drawImage();
       }
+
       previousRotateX = x;
       setGestureStatus("✋ Open palm — move sideways to rotate.");
       return;
@@ -331,11 +357,15 @@ footer{margin-top:75px;padding:25px 0 35px;border-top:1px solid var(--stroke);co
   async function processFrame() {
     if (!running) return;
 
-    // Limit tracking to about 8 frames per second to reduce CPU load.
-    if (!busy && hands && video.readyState >= HTMLMediaElement.HAVE_CURRENT_DATA &&
-        performance.now() - lastDetectionTime >= 125) {
+    if (
+      !busy &&
+      hands &&
+      video.readyState >= HTMLMediaElement.HAVE_CURRENT_DATA &&
+      performance.now() - lastDetectionTime >= 135
+    ) {
       busy = true;
       lastDetectionTime = performance.now();
+
       try {
         await hands.send({image: video});
       } catch (error) {
@@ -350,12 +380,14 @@ footer{margin-top:75px;padding:25px 0 35px;border-top:1px solid var(--stroke);co
 
   async function stopCamera() {
     running = false;
+
     if (frameId !== null) cancelAnimationFrame(frameId);
     frameId = null;
     busy = false;
 
     if (stream) stream.getTracks().forEach(track => track.stop());
     stream = null;
+
     video.pause();
     video.srcObject = null;
     placeholder.hidden = false;
@@ -363,7 +395,9 @@ footer{margin-top:75px;padding:25px 0 35px;border-top:1px solid var(--stroke);co
     stopBtn.disabled = true;
 
     if (hands) {
-      try { await hands.close(); } catch (_) {}
+      try {
+        await hands.close();
+      } catch (_) {}
       hands = null;
     }
 
@@ -372,7 +406,8 @@ footer{margin-top:75px;padding:25px 0 35px;border-top:1px solid var(--stroke);co
   }
 
   async function startCamera() {
-    if (running) return;
+    if (running || stream) return;
+
     startBtn.disabled = true;
     setCameraStatus("Connecting to camera…");
     setGestureStatus("Preparing hand tracking…");
@@ -381,9 +416,6 @@ footer{margin-top:75px;padding:25px 0 35px;border-top:1px solid var(--stroke);co
       if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
         throw new Error("Camera API unavailable. Open the HTTPS website in Chrome.");
       }
-      if (typeof Hands === "undefined") {
-        throw new Error("Hand tracking library did not load. Check your internet connection.");
-      }
 
       stream = await navigator.mediaDevices.getUserMedia({
         audio: false,
@@ -391,24 +423,30 @@ footer{margin-top:75px;padding:25px 0 35px;border-top:1px solid var(--stroke);co
           facingMode: "user",
           width: {ideal: 640},
           height: {ideal: 480},
-          frameRate: {ideal: 20, max: 24}
+          frameRate: {ideal: 15, max: 20}
         }
       });
 
       video.srcObject = stream;
       video.muted = true;
       video.playsInline = true;
+
       await video.play();
 
-      // Wait for the camera to deliver real frames before initializing tracking.
-      if (video.readyState < HTMLMediaElement.HAVE_CURRENT_DATA ||
-          !video.videoWidth || !video.videoHeight) {
+      if (
+        video.readyState < HTMLMediaElement.HAVE_CURRENT_DATA ||
+        !video.videoWidth ||
+        !video.videoHeight
+      ) {
         await new Promise((resolve, reject) => {
-          const timeout = setTimeout(() => reject(new Error("Camera opened but no video frames arrived. Close other camera apps and retry.")), 8000);
+          const timeout = setTimeout(() => {
+            reject(new Error("Camera opened but no video frames arrived. Close other camera apps and retry."));
+          }, 8000);
+
           video.addEventListener("loadeddata", () => {
             clearTimeout(timeout);
             resolve();
-          }, {once:true});
+          }, {once: true});
         });
       }
 
@@ -416,47 +454,76 @@ footer{margin-top:75px;padding:25px 0 35px;border-top:1px solid var(--stroke);co
         throw new Error("Camera stream has no video frames.");
       }
 
-      // Show the preview immediately; do not wait for the tracking model.
+      // Reveal the actual video as soon as camera frames arrive.
       placeholder.hidden = true;
       setCameraStatus(`Camera preview active · ${video.videoWidth} × ${video.videoHeight}`);
+      stopBtn.disabled = false;
+
+      if (typeof Hands === "undefined") {
+        setGestureStatus("Camera works, but the hand-tracking library did not load. Check your internet connection.");
+        startBtn.disabled = false;
+        return;
+      }
 
       hands = new Hands({
         locateFile: file => "https://cdn.jsdelivr.net/npm/@mediapipe/hands/" + file
       });
+
       hands.setOptions({
         maxNumHands: 1,
         modelComplexity: 0,
         minDetectionConfidence: 0.6,
         minTrackingConfidence: 0.5
       });
+
       hands.onResults(onResults);
 
-      await hands.initialize();
+      try {
+        await hands.initialize();
+      } catch (trackingError) {
+        try {
+          await hands.close();
+        } catch (_) {}
+        hands = null;
+        setGestureStatus("Camera preview is working, but hand tracking failed to load. Check internet and refresh.");
+        startBtn.disabled = false;
+        return;
+      }
 
       running = true;
       startBtn.disabled = false;
-      stopBtn.disabled = false;
       setGestureStatus("Hand tracking ready — show your hand to the camera.");
       frameId = requestAnimationFrame(processFrame);
 
     } catch (error) {
       running = false;
-      if (stream) stream.getTracks().forEach(track => track.stop());
-      stream = null;
-      video.srcObject = null;
-      placeholder.hidden = false;
-      startBtn.disabled = false;
-      stopBtn.disabled = true;
 
-      const msg = error.name === "NotAllowedError"
-        ? "Camera permission denied. Set site camera permission to Allow."
-        : error.name === "NotFoundError"
-        ? "No camera found. Check your webcam connection."
-        : error.name === "NotReadableError"
-        ? "Camera is busy. Close the desktop app and other camera apps."
-        : error.message || "Could not start camera.";
-      setCameraStatus("Could not start camera: " + msg);
-      setGestureStatus("Camera or tracking initialization failed.");
+      if (stream && video.srcObject === stream && video.videoWidth > 0) {
+        // Preserve the camera preview if only tracking setup failed.
+        placeholder.hidden = true;
+        startBtn.disabled = false;
+        stopBtn.disabled = false;
+        setCameraStatus(`Camera preview active · ${video.videoWidth} × ${video.videoHeight}`);
+        setGestureStatus("Camera works, but tracking could not start. Check your internet and refresh.");
+      } else {
+        if (stream) stream.getTracks().forEach(track => track.stop());
+        stream = null;
+        video.srcObject = null;
+        placeholder.hidden = false;
+        startBtn.disabled = false;
+        stopBtn.disabled = true;
+
+        const msg = error.name === "NotAllowedError"
+          ? "Camera permission denied. Set site camera permission to Allow."
+          : error.name === "NotFoundError"
+          ? "No camera found. Check your webcam connection."
+          : error.name === "NotReadableError"
+          ? "Camera is busy. Close the desktop app and other camera apps."
+          : error.message || "Could not start camera.";
+
+        setCameraStatus("Could not start camera: " + msg);
+        setGestureStatus("Camera could not start. Check the message above.");
+      }
     }
   }
 
@@ -468,6 +535,8 @@ footer{margin-top:75px;padding:25px 0 35px;border-top:1px solid var(--stroke);co
     if (stream) stream.getTracks().forEach(track => track.stop());
     if (imageUrl) URL.revokeObjectURL(imageUrl);
   });
+
+  drawMessage("Loading sample image…");
 })();
 </script>
 </body>
